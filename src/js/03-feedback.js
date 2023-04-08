@@ -6,7 +6,7 @@ const refs = {
 
 const formData = {};
 
-refs.form.addEventListener('input', onInputValue);
+refs.form.addEventListener('input', throttle(onInputValue, 500));
 refs.form.addEventListener('submit', onFormSubmit);
 
 const formSettings = localStorage.getItem('feedback-form-state');
@@ -24,28 +24,25 @@ function writeSavedValue(savedValue, element) {
 function onInputValue(e) {
   const currentItem = e.target;
 
-  if (currentItem === refs.form.email && currentItem.value) {
-    formData.email = currentItem.value;
-    return localStorage.setItem(
-      'feedback-form-state',
-      JSON.stringify(formData)
-    );
+  if (currentItem === refs.form.email) {
+    formData.email = currentItem.value || '';
+    localStorage.setItem('feedback-form-state', JSON.stringify(formData));
   }
-  if (currentItem === refs.form.message && currentItem.value) {
-    formData.message = currentItem.value;
-    return localStorage.setItem(
-      'feedback-form-state',
-      JSON.stringify(formData)
-    );
+  if (currentItem === refs.form.message) {
+    formData.message = currentItem.value || '';
+    localStorage.setItem('feedback-form-state', JSON.stringify(formData));
   }
 }
 
 function onFormSubmit(e) {
   e.preventDefault();
+
   formData.email
-    ? console.log('email:', formData.email ?? '')
-    : console.log('email:', parsedSettings.email ?? '');
+    ? console.log('email:', formData ?? '')
+    : console.log('email:', parsedSettings.email);
   formData.message
-    ? console.log('message:', formData.message ?? '')
-    : console.log('message:', parsedSettings.message ?? '');
+    ? console.log('message:', formData ?? '')
+    : console.log('message:', parsedSettings.message);
+  e.currentTarget.reset();
+  localStorage.removeItem('feedback-form-state');
 }
