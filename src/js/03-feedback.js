@@ -4,13 +4,17 @@ const refs = {
   form: document.querySelector('.feedback-form'),
 };
 
-const formData = {};
+const KEY_DATA_STORAGE = 'feedback-form-state';
 
-refs.form.addEventListener('input', throttle(onInputValue, 500));
+const formData = {
+  // email: '',
+  // message: '',
+};
+
+refs.form.addEventListener('input', throttle(onInputForm, 500));
 refs.form.addEventListener('submit', onFormSubmit);
 
-const formSettings = localStorage.getItem('feedback-form-state');
-const parsedSettings = JSON.parse(formSettings);
+const parsedSettings = JSON.parse(localStorage.getItem(KEY_DATA_STORAGE));
 
 writeSavedValue(parsedSettings.email, refs.form.email);
 writeSavedValue(parsedSettings.message, refs.form.message);
@@ -21,28 +25,32 @@ function writeSavedValue(savedValue, element) {
   }
 }
 
-function onInputValue(e) {
+function onInputForm(e) {
   const currentItem = e.target;
+  console.log(currentItem.elements);
 
   if (currentItem === refs.form.email) {
-    formData.email = currentItem.value || '';
-    localStorage.setItem('feedback-form-state', JSON.stringify(formData));
+    formData.email = currentItem.value.trim() ?? '';
   }
   if (currentItem === refs.form.message) {
-    formData.message = currentItem.value || '';
-    localStorage.setItem('feedback-form-state', JSON.stringify(formData));
+    formData.message = currentItem.value ?? '';
+    return localStorage.setItem(KEY_DATA_STORAGE, JSON.stringify(formData));
   }
+  return localStorage.setItem(KEY_DATA_STORAGE, JSON.stringify(formData));
 }
 
 function onFormSubmit(e) {
   e.preventDefault();
 
-  formData.email
-    ? console.log('email:', formData ?? '')
-    : console.log('email:', parsedSettings.email);
-  formData.message
-    ? console.log('message:', formData ?? '')
-    : console.log('message:', parsedSettings.message);
+  if (!refs.form.email.value) {
+    return alert('Введіть email');
+  }
+  if (!refs.form.message.value) {
+    return alert('Заповніть поле "Message"');
+  }
+
+  console.log('data:', formData);
+
   e.currentTarget.reset();
-  localStorage.removeItem('feedback-form-state');
+  localStorage.removeItem(KEY_DATA_STORAGE);
 }
