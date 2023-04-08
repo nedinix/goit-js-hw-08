@@ -2,22 +2,18 @@ import throttle from 'lodash.throttle';
 
 const refs = {
   form: document.querySelector('.feedback-form'),
-  email: document.querySelector('input[name="email"]'),
-  message: document.querySelector('textarea[name="message"]'),
 };
 
-const objValues = {};
+const formData = {};
 
+refs.form.addEventListener('input', onInputValue);
 refs.form.addEventListener('submit', onFormSubmit);
-refs.email.addEventListener('input', onInputValue);
-refs.message.addEventListener('input', onInputValue);
 
-const parsedSettings = JSON.parse(localStorage.getItem('feedback-form-state'));
+const formSettings = localStorage.getItem('feedback-form-state');
+const parsedSettings = JSON.parse(formSettings);
 
-console.log(parsedSettings.email);
-writeSavedValue(parsedSettings.email, refs.email);
-console.log(parsedSettings.message);
-writeSavedValue(parsedSettings.message, refs.message);
+writeSavedValue(parsedSettings.email, refs.form.email);
+writeSavedValue(parsedSettings.message, refs.form.message);
 
 function writeSavedValue(savedValue, element) {
   if (savedValue) {
@@ -26,22 +22,30 @@ function writeSavedValue(savedValue, element) {
 }
 
 function onInputValue(e) {
-  const element = e.currentTarget;
-  if (element === refs.email) {
-    objValues.email = element.value;
-    localStorage.setItem('feedback-form-state', JSON.stringify(objValues));
-  }
+  const currentItem = e.target;
 
-  if (element === refs.message) {
-    objValues.message = element.value;
-    localStorage.setItem('feedback-form-state', JSON.stringify(objValues));
+  if (currentItem === refs.form.email && currentItem.value) {
+    formData.email = currentItem.value;
+    return localStorage.setItem(
+      'feedback-form-state',
+      JSON.stringify(formData)
+    );
+  }
+  if (currentItem === refs.form.message && currentItem.value) {
+    formData.message = currentItem.value;
+    return localStorage.setItem(
+      'feedback-form-state',
+      JSON.stringify(formData)
+    );
   }
 }
 
 function onFormSubmit(e) {
   e.preventDefault();
-  console.log(objValues);
-  // console.dir(e.currentTarget.value);
-  // console.dir(e.currentTarget.email);
-  // console.dir(e.currentTarget.message);
+  formData.email
+    ? console.log('email:', formData.email ?? '')
+    : console.log('email:', parsedSettings.email ?? '');
+  formData.message
+    ? console.log('message:', formData.message ?? '')
+    : console.log('message:', parsedSettings.message ?? '');
 }
